@@ -1,91 +1,42 @@
-# med.i.scroll – Gelbe Liste Template
+# med.i.scroll – Gelbe Liste (Vercel-safe)
 
-Technischer React/Vite-Prototyp für ein wiederverwendbares Scrollytelling-Format im Gelbe-Liste-Kontext.
+Diese Variante wurde für ein möglichst robustes Vercel-Deployment reduziert.
 
-## Enthalten
+## Stack
 
-- mobile-first Responsive Design
-- Gelbe-Liste-inspirierte gelb/schwarz/weiße Gestaltung
-- Co-Branding-Zeile für Sponsor/Partner
-- Hero + 6 Story-Schritte
-- Sticky Visual / Scroll Story
-- Scroll-Fortschritt
-- Quiz
-- Video-Demo
-- Tooltip
-- Survey
-- Download-/Link-Module
-- CTA
-- Piano-Analytics-Adapter
-- Reduced-Motion-Unterstützung
+- React 19
+- Vite 8
+- JavaScript / JSX
+- CSS
+- native IntersectionObserver + Scroll Events
+- keine TypeScript-Buildstufe
+- keine zusätzliche Animationsbibliothek
 
-## Tracking-Events
-
-- `page.display`
-- `story_step_view`
-- `scroll_depth` (25/50/75/100)
-- `module_complete`
-- `quiz_answer`
-- `video_start`
-- `video_pause`
-- `tooltip_open`
-- `survey_answer`
-- `pdf_download`
-- `outbound_click`
-- `cta_click`
-
-## Start
+## Start lokal
 
 ```bash
 npm install
 npm run dev
 ```
 
-Produktionsbuild:
+## Build
 
 ```bash
 npm run build
 ```
 
-## Inhalte pro Kundenprojekt anpassen
+## Vercel
 
-Zentrale Datei:
+Das Repository enthält eine `vercel.json` mit:
 
-`src/data/content.ts`
+- Framework: Vite
+- Install Command: `npm install --no-audit --no-fund`
+- Build Command: `npm run build`
+- Output Directory: `dist`
 
-Dort liegen:
-
-- Brand-/Sponsor-Text
-- Hero-Titel
-- Intro
-- Disclaimer
-- sämtliche Story-Schritte
+Vercel sollte das Projekt damit ohne zusätzliche Dashboard-Anpassungen deployen.
 
 ## Piano Analytics
 
-In `index.html` befindet sich eine vorbereitete, auskommentierte SDK-Konfiguration.
-
-Benötigt werden:
-
-- Piano Site-ID
-- Collect Domain
-
-Der Adapter liegt unter:
-
-`src/tracking/piano.ts`
-
-Ohne aktive Piano-Konfiguration werden Events im Dev-Modus in der Browser-Konsole ausgegeben.
-
-## Für den Produktivbetrieb noch ergänzen
-
-- finales Gelbe-Liste-/Vidal-Branding und Logo-Assets
-- Sponsorlogo / Co-Branding-Freigabe
-- echte medizinisch-redaktionell geprüfte Inhalte
-- finale Bild-/Video-Assets und Lizenzen
-- echte Download-Dateien
-- Impressum / Datenschutz
-- Piano Site-ID / Collect Domain / Event-Naming final abstimmen
-- Consent-/CMP-Integration prüfen
-- Browser-/Device-QA
-- SEO-/Metadaten
-- Vercel-/Hosting-Deployment
+`src/tracking/piano.js` verwendet `window.pa.sendEvent(...)`, sobald Piano auf der Seite verfügbar ist.
+Ohne Piano werden Events im Development-Modus in der Konsole ausgegeben.
