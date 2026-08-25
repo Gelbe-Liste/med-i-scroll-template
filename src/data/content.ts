@@ -40,7 +40,7 @@ export const storySteps: StoryStep[] = [
     copy:
       "Versorgungssituationen, Entscheidungswege oder epidemiologische Einordnungen können nacheinander aufgebaut werden. Der visuelle Anker bleibt stehen, während sich die Inhalte im Scrollverlauf verändern.",
     label: "Story",
-    visualTitle: "Versorgungspfad",
+    visualTitle: "Versorgungs-Pfad",
     visualCopy: "Situation → Einordnung → Handlung",
     tags: ["Sticky Visual", "Scroll Trigger", "Infografik"],
   },
@@ -62,7 +62,7 @@ export const storySteps: StoryStep[] = [
     copy:
       "Quiz, Umfrage, Tooltips und Video können direkt in die Story integriert werden. Jede Interaktion erhält ein eigenes Tracking-Event und kann später in Piano Analytics ausgewertet werden.",
     label: "Engage",
-    visualTitle: "Interaktionslayer",
+    visualTitle: "Interaktions-Layer",
     visualCopy: "Quiz · Video · Tooltip · Survey",
     tags: ["quiz_answer", "video_start", "survey_answer"],
   },
