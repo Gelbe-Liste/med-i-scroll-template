@@ -1,42 +1,58 @@
-# med.i.scroll – Gelbe Liste (Vercel-safe)
+# Gelbe Liste med.i.scroll – Mastertemplate
 
-Diese Variante wurde für ein möglichst robustes Vercel-Deployment reduziert.
+Dieses Repository ist die wiederverwendbare technische Basis für neue med.i.scroll-Projekte.
 
-## Stack
+## Für ein neues Projekt müssen normalerweise nur zwei Bereiche geändert werden
 
-- React 19
-- Vite 8
-- JavaScript / JSX
-- CSS
-- native IntersectionObserver + Scroll Events
-- keine TypeScript-Buildstufe
-- keine zusätzliche Animationsbibliothek
+1. `src/project.js` – alle Texte, Kapitel, Links, Quellen, Impressum, PDF-Dateiname, Tracking-ID und Medienpfade.
+2. `public/assets/` – Bilder, Grafiken, Videos und ggf. weitere Dateien.
 
-## Start lokal
+Die React-Komponenten, Navigation, Zoom-Viewer, mobile Darstellung und PDF-Engine bleiben unverändert.
 
-```bash
-npm install
-npm run dev
-```
+## Neues Projekt anlegen
 
-## Build
+1. Dieses Repository in GitHub als Template Repository markieren oder duplizieren.
+2. Neues Repository aus dem Template erzeugen, z. B. `med-i-scroll-pneumokokken-kinder`.
+3. `src/project.js` anpassen.
+4. Medien nach `public/assets/images/`, `public/assets/video/` etc. kopieren.
+5. In Vercel das neue GitHub-Repository als neues Projekt importieren.
+6. Node.js 22.x verwenden.
 
-```bash
-npm run build
-```
+## Unterstützte Kapiteltypen
+
+- `hero` – Einstieg / Key Visual
+- `stats` – Kennzahlen / Facts
+- `standard` – Fließtext, Listen, Zitate, Hinweisboxen
+- `steps` – Schritt-für-Schritt / Entscheidungslogik
+- `video` – Video mit Poster und CTA
+- `sources` – Quellen + PDF-Erstellung
+- `imprint` – Impressum
+
+## Optionale Kapitel-Properties
+
+- `zoomable: true` – zeigt „Grafik öffnen“ und aktiviert Vollbild/Zoom.
+- `wide: true` – breiter Textrahmen.
+- `long: true` – mehr vertikaler Platz für umfangreiche Inhalte.
+- `background` – Hintergrundbild.
+- `focal` – Bildfokus, z. B. `center 30%`.
+- `tone` – `dark` oder `light`.
+- `align` – `left` oder `right`.
+
+## PDF
+
+Der Header-PDF-Button erzeugt eine echte clientseitige DIN-A4-Hochformat-PDF mit jsPDF. Dateiname und Metadaten werden in `project.meta` gepflegt.
+
+## Piano Analytics Tracking
+
+Die stabile Projekt-ID wird in `project.meta.projectId` definiert. Die Tracking-Schicht liegt zentral in `src/tracking/piano.js` und verwendet bevorzugt die vorhandene Vidal-/Gelbe-Liste-Semantik. Scroll Tracking wurde auf die aktuelle Piano-Logik `page.scroll` + `scroll_rate` umgestellt; Kapitel- und Video-Events werden als klar definierte Custom Events geführt.
+
+Im Mastertemplate ist `VITE_PIANO_ENABLED=false`. Nach Validierung der neuen Properties/Events im Piano Data Model und interner Datenschutzfreigabe wird die Variable im produktiven Vercel-Projekt auf `true` gesetzt.
+
+Details: `PIANO-ANALYTICS.md`.
 
 ## Vercel
 
-Das Repository enthält eine `vercel.json` mit:
-
 - Framework: Vite
-- Install Command: `npm install --no-audit --no-fund`
 - Build Command: `npm run build`
-- Output Directory: `dist`
-
-Vercel sollte das Projekt damit ohne zusätzliche Dashboard-Anpassungen deployen.
-
-## Piano Analytics
-
-`src/tracking/piano.js` verwendet `window.pa.sendEvent(...)`, sobald Piano auf der Seite verfügbar ist.
-Ohne Piano werden Events im Development-Modus in der Konsole ausgegeben.
+- Output: `dist`
+- Node.js: 22.x
