@@ -87,3 +87,20 @@ Beispiel CTA-Kapitel:
   primaryCta: { label: "Jetzt öffnen", url: "https://www.gelbe-liste.de/", analyticsId: "cta-vertiefung" }
 }
 ```
+
+
+## Aufklappbare Frage/Antwort-Felder
+Für FAQ- oder Praxisfragen kann jedes `standard`-Kapitel `accordionItems` enthalten. Die Frage selbst ist die klickbare gelbe Zeile; die Antwort wird darunter auf- bzw. zugeklappt. Beispiel:
+
+```js
+accordionVariant: "faq",
+accordionItems: [
+  {
+    id: "faq-1",
+    question: "Frage?",
+    answer: ["Antwort Absatz 1.", "Antwort Absatz 2."]
+  }
+]
+```
+
+Die Interaktion wird über Piano Analytics als `accordion.toggle` erfasst.

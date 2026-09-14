@@ -108,3 +108,11 @@ Projekt-/Contentwerte werden ausschließlich in `src/project.js` gepflegt. Die t
 - `trigger_source`: u. a. `button_previous`, `button_next`, `dot_navigation`, `swipe_left_forward`, `swipe_right_backward`
 
 Die Swipe-Semantik ist bewusst: **links = vorwärts**, **rechts = rückwärts**.
+
+
+### Frage/Antwort-Akkordeon
+- Event: `accordion.toggle`
+- `accordion_title`: angeklickte Frage
+- `interaction_state`: `open` / `close`
+- `trigger_source`: `accordion_question`
+- `accordion_id`, `accordion_group`, `chapter_id` und `chapter_title` werden ebenfalls übergeben.
