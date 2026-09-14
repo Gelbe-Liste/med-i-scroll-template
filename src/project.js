@@ -49,7 +49,9 @@ export const project = {
   ],
 
   imprint: {
+    brandHeading: "Gelbe Liste",
     editorialHeading: "Corporate Publishing",
+    editorialRoleLabel: "Redaktion",
     editorialName: "Guido Strehlau",
     company: "Vidal MMI Germany GmbH",
     street: "Monzastraße 4",
