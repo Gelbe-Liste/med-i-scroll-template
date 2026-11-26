@@ -1,0 +1,11 @@
+{
+  "package": "med-i-scroll-master-template_v6.6_Vercel_PostHog_EU_v1.4.1",
+  "application": "med.i.scroll v6.6",
+  "source_archive": "2026-11-26_med-i-scroll-master-template_v6.6_Piano-PostHog-v1.4.zip",
+  "date": "2026-11-26",
+  "analytics_integration": "Piano + PostHog EU; consent gated",
+  "requires_posthog_project_token_in_vercel": true,
+  "posthog_project_id_needed": false,
+  "production_tracking_default": false,
+  "npm_dependencies_bundled": false
+}

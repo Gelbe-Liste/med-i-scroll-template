@@ -1,0 +1,8 @@
+# Environment: Production (zunaechst ohne Tracking; erst nach Consent/CMP + Datenschutzfreigabe freigeben)
+VITE_POSTHOG_ENABLED=false
+VITE_POSTHOG_PROJECT_TOKEN=phc_HIER_DEN_OEFFENTLICHEN_PROJECT_TOKEN_EINFUEGEN
+VITE_POSTHOG_DEPLOY_ENV=production
+VITE_PIANO_ENABLED=false
+VITE_PIANO_ESSENTIAL_APPROVED=false
+VITE_PIANO_CUSTOM_VIDEO_EVENTS=false
+# NACH FREIGABE: VITE_POSTHOG_ENABLED=true und neues Deployment erstellen.

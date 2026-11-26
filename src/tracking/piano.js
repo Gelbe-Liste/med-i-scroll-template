@@ -1,3 +1,4 @@
+import { initPosthogTracking, setPosthogTrackingContext, sendToPosthog } from "./posthog.js";
 const sentOnce = new Set();
 const pendingEvents = [];
 let persistentContext = { is_PAP: 1 };
@@ -168,6 +169,7 @@ export function sanitizeDestinationPath(url) {
 
 export function setTrackingContext(properties = {}) {
   persistentContext = cleanProperties({ ...persistentContext, ...properties });
+  setPosthogTrackingContext(persistentContext);
   if (pianoEnabled && window.pa?.setProperties) {
     window.pa.setProperties(persistentContext, { persistent: true });
   }
@@ -175,6 +177,7 @@ export function setTrackingContext(properties = {}) {
 
 export function initPianoTracking(properties = {}) {
   persistentContext = cleanProperties({ ...persistentContext, ...properties });
+  initPosthogTracking(persistentContext);
   if (!pianoEnabled) {
     if (import.meta.env.DEV) console.info("[Piano disabled]", persistentContext);
     return Promise.resolve();
@@ -205,6 +208,8 @@ export function initPianoTracking(properties = {}) {
 }
 
 export function trackEvent(eventName, properties = {}) {
+  // PostHog erhält die fachlichen Video-Events unabhängig von Pianos A/V-Insights-Flag.
+  sendToPosthog(eventName, properties);
   if (customVideoEventNames.has(eventName) && !customVideoEventsEnabled) return; // Nur wenn Custom Video statt A/V Insights freigegeben ist.
   const clean = cleanProperties(properties);
   const debugPayload = { ...persistentContext, ...clean };
