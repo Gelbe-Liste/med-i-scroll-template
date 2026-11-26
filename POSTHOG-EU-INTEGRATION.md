@@ -1,3 +1,5 @@
+# Nachtrag v1.5.0: Integrierte Consent-Box – siehe START-HIER-VERCEL.md und CHANGES-2026-11-26-CONSENT.md.
+
 # PostHog EU Cloud + Piano Analytics · Integration v1.4 · 26.11.2026
 
 ## Was ist umgesetzt?
@@ -6,9 +8,9 @@
 - **PostHog erhält dieselben bereits ausgelösten Events** (`page.display`, `click.action`, `pop_in.display`, ggf. `chapter.display`, `page.scroll`, `accordion.toggle`, `workflow.slide` und `video.*`) einschließlich `project_id` und weiterer bestehender Properties. Video-Fallback-Flag betrifft weiterhin **nur Piano**.
 - Zusätzlich erzeugt PostHog beim ersten zustimmungsbasierten `page.display` **ein** `$pageview` für die physische Seitenansicht (nicht für jeden virtuellen med.i.tap-Screen). Die `page.display`-Events bilden weiterhin die virtuellen Screen-/Seitenaufrufe ab.
 - Kein PostHog-SDK, keine Abhängigkeit, **keine Autocapture-/Session-Replay-Funktion**: Es wird der von PostHog dokumentierte EU-Capture-Endpunkt `POST https://eu.i.posthog.com/i/v0/e/` genutzt. Dies ist ein schlanker, bewusst auf Event Analytics beschränkter Adapter. Für spätere erweiterte PostHog-Produkte kann er durch ein offizielles SDK ersetzt werden.
-- Consent-Gate: **keine Verbindung zu PostHog und keine personenbezogene Browserkennung vor explizitem Consent**. Die Möglichkeit, einen Account zu betreiben, ersetzt nicht die Freigabe zur Datenerfassung.
+- Consent-Gate: **keine Verbindung zu PostHog und keine pseudonyme Browserkennung vor explizitem Consent**. Die Möglichkeit, einen Account zu betreiben, ersetzt nicht die Freigabe zur Datenerfassung.
 - URL-Query-Parameter und Hashes aus `page_url` und `$current_url` werden ausgeschlossen; aus der URL werden nur erlaubte UTM-Felder übernommen. Offensichtliche PII-Felder/E-Mail-Adressen werden im Adapter blockiert. **Das ist keine vollständige Datenschutzgarantie.**
-- Das Event-Payload enthält `$process_person_profile: false`. Nach Consent erhält der Browser eine anonyme ID in `localStorage`; die Session-ID (UUIDv7) wird in `sessionStorage` angelegt, nach 30 Min. Inaktivität oder spätestens 24 h erneuert. Beim Widerruf werden beide Kennungen lokal gelöscht. Bereits versandte Events sind nicht rückwirkend gelöscht.
+- Das Event-Payload enthält `$process_person_profile: false`. Nach Consent erhält der Browser eine **pseudonyme, wiedererkennbare zufällige ID** in `localStorage`; die Session-ID (UUIDv7) wird in `sessionStorage` angelegt, nach 30 Min. Inaktivität oder spätestens 24 h erneuert. Beim Widerruf werden beide Kennungen lokal gelöscht. Bereits versandte Events sind nicht rückwirkend gelöscht.
 
 ## 1. Eigenes EU-Projekt anlegen
 
@@ -26,17 +28,17 @@ Beide Templates können den **gleichen Project Token** nutzen. Nach Änderungen 
 
 ## 2. Consent-Management anbinden (Pflicht vor produktiver Nutzung)
 
-Das Template **nimmt keine Einwilligung an** und enthält **keinen eigenen Consent-Banner**. Die bestehende CMP muss die Entscheidung nach Seitenstart und bei jeder Änderung (inklusive Widerruf) übergeben:
+**Neu seit Release v1.5.0:** Das Template enthält jetzt die gelbe Consent-Komponente (`src/consent/*`), die Zustimmung und Widerruf selbst speichert und an PostHog und Piano übergibt. Eine externe CMP ist für die technische Funktion nicht mehr zwingend nötig. Die technische API für eine spätere zentrale Consent-Lösung bleibt erhalten:
 
 ```js
 // Nur im echten Callback der Consent-Plattform aufrufen:
 window.dispatchEvent(new CustomEvent("medi:analytics-consent", {
-  detail: { posthog: true } // Einwilligung wurde erteilt
+  detail: { posthog: true, piano: true } // Einwilligung wurde erteilt
 }));
 
 // Bei Nichtzustimmung oder Widerruf:
 window.dispatchEvent(new CustomEvent("medi:analytics-consent", {
-  detail: { posthog: false }
+  detail: { posthog: false, piano: false }
 }));
 ```
 

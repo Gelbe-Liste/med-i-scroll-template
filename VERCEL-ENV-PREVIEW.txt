@@ -1,7 +1,7 @@
-# In Vercel > Projekt > Settings > Environment Variables eintragen.
-# Environment: NUR Preview (nicht Production)
-VITE_POSTHOG_ENABLED=true
-VITE_POSTHOG_PROJECT_TOKEN=phc_HIER_DEN_OEFFENTLICHEN_PROJECT_TOKEN_EINFUEGEN
+# Optional, derzeit nicht verwendet: die Apps laufen auf ihren Vercel-Produktionsdomains.
+# Fuer Preview keine PostHog-Erfassung aktivieren; diese Datei NICHT nach Production kopieren.
+VITE_POSTHOG_ENABLED=false
+VITE_POSTHOG_PROJECT_TOKEN=
 VITE_POSTHOG_DEPLOY_ENV=preview
 VITE_PIANO_ENABLED=false
 VITE_PIANO_ESSENTIAL_APPROVED=false

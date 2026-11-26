@@ -14,6 +14,7 @@ import ImprintContent from "./components/ImprintContent";
 import CtaContent from "./components/CtaContent";
 import ImageLightbox from "./components/ImageLightbox";
 import { generateProjectPdf } from "./pdf/generatePdf";
+import AnalyticsConsent from "./consent/AnalyticsConsent";
 import {
   initPianoTracking,
   sanitizePageUrl,
@@ -172,6 +173,7 @@ export default function App() {
         ))}
       </main>
       <ImageLightbox open={Boolean(openGraphic)} image={openGraphic?.inlineImage || openGraphic?.background} imageId={openGraphic?.imageId || openGraphic?.id} title={openGraphic?.kicker || openGraphic?.nav || "Grafik"} chapterId={openGraphic?.id} pageName={pageName} onClose={handleCloseGraphic} />
+      <AnalyticsConsent privacyHref="/datenschutz.html" />
     </>
   );
 }

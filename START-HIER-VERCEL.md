@@ -1,80 +1,57 @@
-# START HIER – med.i.scroll v6.6 · Vercel Deployment + PostHog EU
+# START HIER – v6.7 · Consent + PostHog EU + Piano auf Vercel Production
 
-**Stand:** 26.11.2026 · Verpackung/QA v1.4.1 · Basis ist die bestehende Mastertemplate-Version. Der fachliche Tracking-Layer bleibt erhalten.
+**Neuer Stand:** 26.11.2026 · Analytics-Consent Release v1.5.0
 
-## Was ist vorbereitet?
+## 1. Quellcode bereitstellen
 
-- React/Vite-Quellprojekt inkl. `src/tracking/piano.*` (unverändert separat schaltbar) und `src/tracking/posthog.js` (PostHog EU).
-- `vercel.json`: Vite-Build, `npm ci`, Ausgabe `dist`.
-- `.env.example`: Dokumentation der Umgebungsvariablen. **Keine `.env` mit echtem Token im ZIP.**
-- Zwei Kopiervorlagen `VERCEL-ENV-PREVIEW.txt` und `VERCEL-ENV-PRODUCTION.txt`.
-- `deployment_environment` wird als PostHog-Event-Property `preview` bzw. `production` übertragen. Kundenberichte immer nach `project_id` **und** `deployment_environment=production` filtern.
+- Diese Version entpacken, **den Inhalt des obersten Projektordners** in das mit Vercel verbundene Git-Repository übernehmen, committen und auf den Produktionsbranch pushen.
+- Alternativ aus dem Projektordner `vercel --prod` verwenden. Ein ZIP als Datei wird nicht direkt von Vercel als Anwendung deployed.
+- Existierende Inhalte und App-Navigation bleiben erhalten; neu sind Consent-UI, Gating und Datenschutz-Vorlagenseite.
+- Nach dem Build die reguläre Domain testen. Prüfen, ob die gelbe Consent-Box beim ersten Besuch sichtbar ist.
 
-## 1 · Projekt auf Vercel deployen
+## 2. Environment Variables in Vercel **für Production**
 
-Vercel ist Git- bzw. CLI-basiert. Das ZIP ist **Quellcode zum Entpacken**, nicht automatisch ein hochladbares Vercel-Bundle.
-
-**Bei vorhandenem Vercel-Projekt/Git-Repository:** ZIP entpacken; den Inhalt des Verzeichnisses (inkl. `package.json`, `src`, `public`, `vercel.json`) im zugehörigen Git-Repository als neuen Commit bereitstellen und pushen. Das bestehende Vercel-Projekt baut den Commit neu. Bei fehlendem Git-Zugang Entwicklungs-/IT-Team um diesen Commit bitten.
-
-**Bei neuem Vercel-Projekt:** Inhalt in ein Git-Repository pushen → Vercel > Add New > Project > Import Git Repository. Framework `Vite`, Root Directory mit `package.json`, Output Directory `dist`.
-
-**Alternativ mit CLI (nach `npm` und Vercel-Login):** `vercel` aus dem entpackten Projektordner aufrufen und das Projekt verknüpfen. Für ein produktives Deployment `vercel --prod` erst nach Freigabe einsetzen.
-
-## 2 · Vercel Environment Variables (im Vercel-Dashboard)
-
-In `Settings > Environment Variables` pro Projekt erfassen. Die Datei `VERCEL-ENV-PREVIEW.txt` enthält alle Namen/Werte.
-
-| Variablenname | Preview-Wert |
-|---|---|
-| `VITE_POSTHOG_ENABLED` | `true` |
-| `VITE_POSTHOG_PROJECT_TOKEN` | eigener öffentlicher Token `phc_...` aus PostHog EU |
-| `VITE_POSTHOG_DEPLOY_ENV` | `preview` |
-| `VITE_PIANO_ENABLED` | `false` |
-| `VITE_PIANO_ESSENTIAL_APPROVED` | `false` |
-
-Die numerische PostHog-Project-ID wird **nicht benötigt**. Beide Mastertemplates können denselben PostHog EU Token verwenden und werden über `project_id` unterschieden.
-
-Für **Production** zunächst `VITE_POSTHOG_ENABLED=false` setzen; siehe `VERCEL-ENV-PRODUCTION.txt`. Vite-Variablen werden beim **Build** eingebettet: nach jeder Änderung ein neues Deployment erstellen.
-
-## 3 · Consent: Vor produktiver Datenerfassung erforderlich
-
-Die Anwendungen enthalten **keine fertige CMP-/Cookie-Banner-Oberfläche**. Nur das bestehende Consent-Signal ist technisch vorbereitet. Ohne diese Einwilligungsschnittstelle sendet PostHog auch mit aktivierter Umgebungsvariable **keine** Events.
-
-Die echte Consent-Plattform muss bei gültiger Analytics-Einwilligung und bei Widerruf aufrufen:
-
-```js
-window.dispatchEvent(new CustomEvent('medi:analytics-consent', { detail: { posthog: true } }));
-// Beim Widerruf:
-window.dispatchEvent(new CustomEvent('medi:analytics-consent', { detail: { posthog: false } }));
+```dotenv
+VITE_POSTHOG_ENABLED=true
+VITE_POSTHOG_PROJECT_TOKEN=phc_HIER_PROJECT_TOKEN
+VITE_POSTHOG_DEPLOY_ENV=production
+VITE_PIANO_ENABLED=false
+VITE_PIANO_ESSENTIAL_APPROVED=false
+VITE_PIANO_CUSTOM_VIDEO_EVENTS=false
 ```
 
-Eine bereits früher erteilte gültige Einwilligung muss nach dem Laden der Anwendung erneut an den Adapter übergeben werden. Vor Produktion: AVV, Datenschutzhinweise, Rechtsgrundlage/CMP, Netzwerkpolitik/CSP und Datenminimierung von IT/Datenschutz freigeben lassen.
+Der numerische Project ID wird nicht benötigt. Der öffentliche `phc_...`-Token wird nicht fest in den ZIP-Quellcode geschrieben. Änderungen an Vercel-Variablen werden **erst nach neuem Production-Build** wirksam.
 
-## 4 · Erster Preview-Test (nur nach eigener bewusster Testeinwilligung)
+## 3. Nutzer-Einwilligung (jetzt integriert)
 
-1. In Vercel die **Preview**-Umgebungsvariablen setzen und neuen Preview-Build deployen.
-2. Preview-URL aufrufen. Chrome/Firefox Entwicklertools > Konsole öffnen.
-3. Als bewusst einwilligender Testnutzer in die Konsole eingeben:
+- Erster Aufruf (oder nach Ablauf der lokalen Entscheidung): gelbe Consent-Box, ohne Tracking.
+- `Nur notwendige Funktionen`: Anwendung nutzbar, PostHog und Piano erfassen nichts.
+- `Analytics zustimmen`: bei korrekt hinterlegtem Token Beginn der PostHog-Erfassung; Piano nur bei separater Freigabe und Aktivierung.
+- Nach Entscheidung: kleine Schaltfläche **Datenschutz**, darüber jederzeit erneut auswählen bzw. Zustimmung widerrufen.
+- Entscheidung bleibt 180 Tage pro Domain bestehen. Kein rückwirkendes Nachsenden vorheriger Interaktionen.
+- Für beide Analytics-Anbieter gilt dieselbe Einwilligung, soweit derselbe Zweck vom Datenschutzteam freigegeben wird.
 
-   ```js
-   window.dispatchEvent(new CustomEvent('medi:analytics-consent', {detail: {posthog: true}}));
-   ```
+## 4. Funktionsprüfung über die Production-Domain
 
-4. In der Anwendung Kapitel/Module aufrufen und CTAs testen.
-5. PostHog EU > **Activity**: nach `page.display`, `$pageview`, `click.action` sowie `project_id` und `deployment_environment=preview` filtern.
-6. Im Browser-Tab `Network` nach `eu.i.posthog.com/i/v0/e/` filtern. Bei fehlenden Requests zuerst Consent-Signal und Vercel-Variablen prüfen.
-7. Zum Widerruf dieselbe Anweisung mit `posthog:false` ausführen. Danach dürfen keine neuen Events versendet werden.
+1. Seite im privaten Browserfenster aufrufen. Banner muss sichtbar sein.
+2. F12 / Netzwerk → nach `eu.i.posthog.com` suchen. **Vor Zustimmung: keine Requests.**
+3. `Nur notwendige Funktionen` wählen, einige Kapitel bzw. Screens bedienen. Weiterhin **keine Requests**.
+4. Über **Datenschutz** Einstellungen öffnen, `Analytics zustimmen` wählen. Netzwerkrequests prüfen; PostHog → Activity → Last hour: z. B. `page.display` und `$pageview`.
+5. Weitere fachliche Interaktionen ausführen und Events nach `project_id` filtern.
+6. Über **Datenschutz → Einwilligung widerrufen** Zustimmung zurücknehmen. Neue Interaktionen dürfen keine Requests mehr auslösen.
+7. Seite aktualisieren: Ablehnung bleibt gespeichert. Die Entscheidung wird nach max. 180 Tagen erneut abgefragt.
 
-**Wichtig:** Events mit Preview-Token können echte PostHog-Events im Projekt erzeugen. Sie gehören nicht in produktive Kundenreports; daher `deployment_environment=production` filtern oder besser ein separates QA-PostHog-Projekt nutzen.
+**Hinweis:** Testevents auf der Production-Domain tragen `deployment_environment=production`. Für Kundenreports Testzeitraum separat notieren/ausfiltern. Event-Eingang in PostHog ist erst mit realem Token und Netzwerkrequests bestätigt.
 
-## 5 · Produktiver Go-live
+## 5. Datenschutz-Freigabe vor breiter Datenerhebung
 
-- CMP stellt die korrekten Signale bereit (inkl. bestehender Einwilligung und Widerruf).
-- PostHog-/Datenschutzfreigabe dokumentiert und DPA/Datenschutzhinweise geprüft.
-- Preview-Events und KPIs sind in PostHog geprüft; Dashboard-Filter `project_id`, `deployment_environment` festgelegt.
-- Erst dann `VITE_POSTHOG_ENABLED=true` **für Production** setzen, Production-Rebuild auslösen und in Activity prüfen.
-- Piano weiterhin **deaktiviert**, bis das Vidal-Piano-Data-Model und Consent freigegeben sind.
+`/datenschutz.html` ist eine **gekennzeichnete Projektvorlage**, keine abschließend rechtlich geprüfte Datenschutzerklärung. Vor Kunden-Go-live Verantwortliche, Datenschutzkontakt, Verarbeitung, AVV/DPA, Speicherdauer, PostHog-IP-Datenverarbeitung, Widerrufs-/Betroffenenrechte und ggf. Piano ergänzen und freigeben lassen.
 
-## Verifikation der ZIP-Quelle
+Die Formulierung **pseudonymisiert** ist technisch richtig: PostHog verwendet einen zufälligen, wiedererkennbaren `distinct_id`. Vollständige Anonymisierung ist dadurch nicht gegeben.
 
-Unit-Test des PostHog-Adapters: `npm run test:analytics`. Vollständiger Build: `npm ci && npm run build` (oder Vercel-Buildlog). Der vollständige Build konnte bei der Erstellung nicht durchgeführt werden, weil die npm-Pakete hier nicht aus dem Internet geladen werden können.
+## 6. Tests und Fehlerbehebung
+
+- `npm ci && npm run build` in einer Umgebung mit Paketregister oder das Vercel-Build-Log prüfen.
+- `npm run test:analytics` (Node 22) ausführen.
+- Wenn kein Request nach Zustimmung: Vercel Production-Variablen, Redeployment, PostHog-EU-Projekt/Token, Adblocker und `connect-src`-CSP prüfen.
+- Falls Piano künftig freigegeben wird: vor Aktivierung Data Model, SDK-Consent-Modus und tatsächliche Event-Übermittlung mit Analytics/Datenschutz abstimmen.
