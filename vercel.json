@@ -3,5 +3,11 @@
   "framework": "vite",
   "installCommand": "npm ci --include=optional --no-audit --no-fund",
   "buildCommand": "npm run build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/_medi/r",
+      "destination": "https://eu.i.posthog.com/i/v0/e/"
+    }
+  ]
 }

@@ -44,7 +44,7 @@ test("PostHog adapter: Consent, events, sessions and revocation", async () => {
     listeners.get("medi:analytics-consent")({detail:{posthog:true}});
     await new Promise(resolve => setTimeout(resolve, 0));
     assert.deepEqual(captured.map(x=>x.body.event), ["$pageview", "page.display"]);
-    assert(captured.every(x => x.url === "https://eu.i.posthog.com/i/v0/e/"));
+    assert(captured.every(x => x.url === "/_medi/r"));
     assert(captured.every(x => x.body.properties.project_id === "qa-project"));
     assert(captured.every(x => x.body.api_key === "phc_testtoken123" && x.body.distinct_id === x.body.properties.distinct_id));
     assert(captured.every(x => x.body.properties.deployment_environment === "preview"));

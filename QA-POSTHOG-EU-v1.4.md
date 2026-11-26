@@ -1,3 +1,5 @@
+> **Update v6.11:** Für Browser-Network-Tests gilt der Same-Origin-Endpunkt `/_medi/r`, nicht die alte direkte EU-Domain.
+
 # QA-Abnahme PostHog EU · Version 1.4 (26.11.2026)
 
 ## Automatisch geprüft
@@ -17,7 +19,7 @@
 ## Unbedingt im Staging prüfen
 
 1. `.env`/Vercel: `VITE_POSTHOG_ENABLED=true` und EU-Projekt-Token `phc_…` setzen; `VITE_PIANO_ENABLED=false` lassen.
-2. Vor Consent: Browser Network zeigt **keine** Anfragen an `eu.i.posthog.com`; keine `med_i_posthog_*`-Kennungen.
+2. Vor Consent: Browser Network zeigt **keine** Anfragen an `/_medi/r`; keine `med_i_posthog_*`-Kennungen.
 3. Nach erlaubter Zustimmung: Activity-Ansicht enthält `page.display` und `$pageview`, beide mit `project_id`.
 4. Alle vorgesehenen Inhaltsinteraktionen auslösen; im PostHog-Eventstream auf IDs/Typen, Scopes, Werte prüfen.
 5. Einwilligung widerrufen, erneut klicken: keine neuen Requests; Kennungen aus Local/Session Storage entfernt.

@@ -1,3 +1,9 @@
+# AKTUELL: med.i.scroll v6.11 – Netzwerkfehlerlösung
+
+Bitte zuerst `START-HIER-POSTHOG-v6.11.md` lesen. Die neue Version benötigt die Rewrite-Regel aus `vercel.json`, um die Event-Requests über die eigene Vercel-Domain zu senden.
+
+---
+
 # START HIER – v6.8 · Consent + PostHog EU + Piano auf Vercel Production
 
 **Neuer Stand:** 26.11.2026 · Consent-/Diagnose-Release v1.6.0
@@ -34,7 +40,7 @@ Der numerische Project ID wird nicht benötigt. Der öffentliche `phc_...`-Token
 ## 4. Funktionsprüfung über die Production-Domain
 
 1. Seite im privaten Browserfenster aufrufen. Banner muss sichtbar sein.
-2. F12 / Netzwerk → nach `eu.i.posthog.com` suchen. **Vor Zustimmung: keine Requests.**
+2. F12 / Netzwerk → nach `/_medi/r` suchen. **Vor Zustimmung: keine Requests.**
 3. `Nur notwendige Funktionen` wählen, einige Kapitel bzw. Screens bedienen. Weiterhin **keine Requests**.
 4. Über **Datenschutz** Einstellungen öffnen, `Analytics zustimmen` wählen. Netzwerkrequests prüfen; PostHog → Activity → Last hour: z. B. `page.display` und `$pageview`.
 5. Weitere fachliche Interaktionen ausführen und Events nach `project_id` filtern.

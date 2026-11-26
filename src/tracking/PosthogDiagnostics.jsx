@@ -31,12 +31,13 @@ export default function PosthogDiagnostics() {
       <div>Project Token konfiguriert: <strong>{label(status.tokenConfigured)}</strong> <small>{status.tokenHint}</small></div>
       <div>Analytics-Einwilligung: <strong>{label(status.consent)}</strong></div>
       <div>Deployment: <strong>{status.environment}</strong></div>
+      <div>Übertragung: <strong>{status.transport}</strong></div>
       <div>HTTP-Requests: <strong>{status.attemptedCount}</strong> · HTTP erfolgreich: <strong>{status.acceptedCount}</strong></div>
       <div style={{borderTop:"1px solid #ddd",marginTop:8,paddingTop:7}}>Zuletzt: <strong>{status.lastTransport.event}</strong> – {status.lastTransport.status}{status.lastTransport.code !== null ? ` (HTTP ${status.lastTransport.code})` : ""}</div>
       <div>Serverantwort: <strong>{status.lastTransport.serverInfo}</strong></div>
       {qaTrace && <div>Testkennung: <code>{qaTrace}</code></div>}
       <button type="button" disabled={!ready} onClick={sendQa} style={{marginTop:10,width:"100%",border:0,borderRadius:7,padding:10,background:ready?"#161616":"#ddd",color:ready?"#fff":"#555",cursor:ready?"pointer":"not-allowed",fontWeight:700}}>Testevent senden (nur nach Einwilligung)</button>
-      <small style={{display:"block",marginTop:7}}>Keine Anzeige des Tokens. HTTP 200 bestätigt nur die Annahme, nicht die Speicherung. Prüfen Sie den PostHog-Projektnamen und Data management → Ingestion warnings. Das Event heißt med.i.qa.</small>
+      <small style={{display:"block",marginTop:7}}>Keine Anzeige des Tokens. HTTP 200 bestätigt nur die Annahme, nicht die Speicherung. Die POST-Anfrage geht über die eigene Vercel-Domain. Prüfen Sie den PostHog-Projektnamen und Data management → Ingestion warnings. Das Event heißt med.i.qa.</small>
     </aside>
   );
 }

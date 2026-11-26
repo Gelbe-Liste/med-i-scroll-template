@@ -1,9 +1,11 @@
 // PostHog EU – leichter Event-Adapter ohne PostHog-SDK, Session-Replay oder Autocapture.
-// Offizieller Capture-Endpunkt: https://eu.i.posthog.com/i/v0/e/
+// Browser sendet an Vercel auf derselben Domain. Vercel leitet POST an die offizielle EU Capture API weiter.
+// Rewrite in vercel.json: /_medi/r -> https://eu.i.posthog.com/i/v0/e/
+// Kein PostHog-SDK / Autocapture oder Person-Profile.
 // KEINE Übermittlung vor externer Consent-Freigabe. Kein Tracking durch bloßes Laden der App.
 const enabled = String(import.meta.env.VITE_POSTHOG_ENABLED || "false").toLowerCase() === "true";
 const token = String(import.meta.env.VITE_POSTHOG_PROJECT_TOKEN || "").trim();
-const endpoint = "https://eu.i.posthog.com/i/v0/e/";
+const endpoint = "/_medi/r";
 const validToken = /^phc_[A-Za-z0-9_-]+$/.test(token);
 const deployEnvRaw = String(import.meta.env.VITE_POSTHOG_DEPLOY_ENV || "unconfigured").toLowerCase();
 const deployEnvironment = ["preview", "production", "development"].includes(deployEnvRaw)
@@ -28,6 +30,7 @@ let acceptedCount = 0;
 export function getPosthogDiagnostics() {
   return {
     enabled, tokenConfigured: validToken, consent: allowed,
+    transport: "Vercel Same-Origin Proxy (/_medi/r)",
     tokenHint: validToken ? `phc_…${token.slice(-5)}` : "–",
     environment: deployEnvironment, attemptedCount, acceptedCount,
     lastTransport: { ...lastTransport }
@@ -157,7 +160,7 @@ function send(eventName, props = {}) {
       $session_id: activeSession(),
       $process_person_profile: false,
       $lib: "med-i-posthog-capture-adapter",
-      $lib_version: "1.0.2"
+      $lib_version: "1.0.3"
     },
     timestamp: new Date().toISOString()
   };
@@ -185,7 +188,7 @@ function send(eventName, props = {}) {
     });
     if (!response.ok && (debugMode || import.meta.env.DEV)) console.warn("[PostHog] HTTP", response.status, summary);
   }).catch(error => {
-    if (debugMode) updateDiagnostics({ event: eventName, status: "Netzwerkfehler / Blocker / CORS (Network-Tab prüfen)", code: null, serverInfo: "Kein HTTP-Ergebnis", at: new Date().toLocaleTimeString("de-DE") });
+    if (debugMode) updateDiagnostics({ event: eventName, status: "Netzwerkfehler / Browser- oder Proxy-Blockade (Network-Tab prüfen)", code: null, serverInfo: (error && typeof error.message === "string") ? `Fetch-Fehler: ${error.message.slice(0, 120)}` : "Kein HTTP-Ergebnis", at: new Date().toLocaleTimeString("de-DE") });
     if (debugMode || import.meta.env.DEV) console.warn("[PostHog] Event fehlgeschlagen", error);
   });
 }

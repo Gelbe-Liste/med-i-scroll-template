@@ -1,3 +1,5 @@
+> **Historische Dokumentation einer älteren Version.** Für v6.11 gilt ausschließlich die aktualisierte Anleitung `START-HIER-POSTHOG-v6.11.md`. Der Browser sendet jetzt nicht mehr direkt an `eu.i.posthog.com`.
+
 # med.i.scroll v6.10 – PostHog EU: Diagnose & Consent
 
 ## Was ist neu?

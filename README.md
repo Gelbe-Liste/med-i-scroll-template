@@ -1,3 +1,9 @@
+# AKTUELL: med.i.scroll v6.11 – Netzwerkfehlerlösung
+
+Bitte zuerst `START-HIER-POSTHOG-v6.11.md` lesen. Die neue Version benötigt die Rewrite-Regel aus `vercel.json`, um die Event-Requests über die eigene Vercel-Domain zu senden.
+
+---
+
 > **Neu (26.11.2026):** PostHog EU + Piano Paralleltracking vorbereitet. Siehe [POSTHOG-EU-INTEGRATION.md](POSTHOG-EU-INTEGRATION.md).
 
 # med.i.scroll Mastertemplate v6.3

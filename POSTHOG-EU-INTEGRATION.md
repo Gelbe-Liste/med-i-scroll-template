@@ -1,3 +1,5 @@
+# Update v6.11: PostHog-Eventübermittlung erfolgt über `/_medi/r` mit Vercel-Rewrite zur EU-Capture-API. Siehe START-HIER-POSTHOG-v6.11.md.
+
 > **Update v6.8 (26.11.2026):** Der Legacy-Capture-Adapter sendet `api_key` und `distinct_id` in dokumentierter Form. Für nachvollziehbare Fehlersuche `?medi_debug=1` verwenden. Separate Datenschutzinformationen außerhalb der Consent-Box sind vor dem öffentlichen Analytics-Betrieb erforderlich. Siehe `UPDATE-2026-11-26-v6.8-POSTHOG-FEHLERSUCHE.md`.
 
 # Nachtrag v1.5.0: Integrierte Consent-Box – siehe START-HIER-VERCEL.md und CHANGES-2026-11-26-CONSENT.md.
@@ -9,7 +11,7 @@
 - **Piano bleibt erhalten**. Der bestehende `src/tracking/piano.*`-Code wird weiterhin unabhängig über `VITE_PIANO_ENABLED` gesteuert.
 - **PostHog erhält dieselben bereits ausgelösten Events** (`page.display`, `click.action`, `pop_in.display`, ggf. `chapter.display`, `page.scroll`, `accordion.toggle`, `workflow.slide` und `video.*`) einschließlich `project_id` und weiterer bestehender Properties. Video-Fallback-Flag betrifft weiterhin **nur Piano**.
 - Zusätzlich erzeugt PostHog beim ersten zustimmungsbasierten `page.display` **ein** `$pageview` für die physische Seitenansicht (nicht für jeden virtuellen med.i.tap-Screen). Die `page.display`-Events bilden weiterhin die virtuellen Screen-/Seitenaufrufe ab.
-- Kein PostHog-SDK, keine Abhängigkeit, **keine Autocapture-/Session-Replay-Funktion**: Es wird der von PostHog dokumentierte EU-Capture-Endpunkt `POST https://eu.i.posthog.com/i/v0/e/` genutzt. Dies ist ein schlanker, bewusst auf Event Analytics beschränkter Adapter. Für spätere erweiterte PostHog-Produkte kann er durch ein offizielles SDK ersetzt werden.
+- Kein PostHog-SDK, keine Abhängigkeit, **keine Autocapture-/Session-Replay-Funktion**: Es wird der von PostHog dokumentierte EU-Capture-Endpunkt `POST /_medi/r` genutzt, serverseitig über Vercel weitergeleitet an `https://eu.i.posthog.com/i/v0/e/`. Dies ist ein schlanker, bewusst auf Event Analytics beschränkter Adapter. Für spätere erweiterte PostHog-Produkte kann er durch ein offizielles SDK ersetzt werden.
 - Consent-Gate: **keine Verbindung zu PostHog und keine pseudonyme Browserkennung vor explizitem Consent**. Die Möglichkeit, einen Account zu betreiben, ersetzt nicht die Freigabe zur Datenerfassung.
 - URL-Query-Parameter und Hashes aus `page_url` und `$current_url` werden ausgeschlossen; aus der URL werden nur erlaubte UTM-Felder übernommen. Offensichtliche PII-Felder/E-Mail-Adressen werden im Adapter blockiert. **Das ist keine vollständige Datenschutzgarantie.**
 - Das Event-Payload enthält `$process_person_profile: false`. Nach Consent erhält der Browser eine **pseudonyme, wiedererkennbare zufällige ID** in `localStorage`; die Session-ID (UUIDv7) wird in `sessionStorage` angelegt, nach 30 Min. Inaktivität oder spätestens 24 h erneuert. Beim Widerruf werden beide Kennungen lokal gelöscht. Bereits versandte Events sind nicht rückwirkend gelöscht.
@@ -26,7 +28,7 @@ VITE_POSTHOG_PROJECT_TOKEN=phc_HIER_EIGENEN_PROJEKT_TOKEN_EINFUEGEN
 VITE_PIANO_ENABLED=false
 ```
 
-Beide Templates können den **gleichen Project Token** nutzen. Nach Änderungen an Vite-Umgebungsvariablen neu bauen und ausrollen. Der EU-Endpunkt ist fest im Code konfiguriert.
+Beide Templates können den **gleichen Project Token** nutzen. Nach Änderungen an Vite-Umgebungsvariablen neu bauen und ausrollen. Der EU-Endpunkt ist in der Vercel-Rewrite-Regel konfiguriert; der Browser sendet an die eigene Domain `/_medi/r`.
 
 ## 2. Consent-Management anbinden (Pflicht vor produktiver Nutzung)
 
@@ -52,11 +54,11 @@ window.dispatchEvent(new CustomEvent("medi:analytics-consent", {
 
 ## 3. Test ohne produktive Erhebung
 
-In einem isolierten QA-Projekt `VITE_POSTHOG_ENABLED=true` und einen **QA-Project-Token** konfigurieren; nicht mit einem echten Kundentoken in lokalen Tests mischen. Für einen ausdrücklich eingewilligten Testnutzer den Consent-Callback im Browser auslösen. Im Network-Tab nach `https://eu.i.posthog.com/i/v0/e/` filtern und im PostHog-Activity-Tab die Events prüfen.
+In einem isolierten QA-Projekt `VITE_POSTHOG_ENABLED=true` und einen **QA-Project-Token** konfigurieren; nicht mit einem echten Kundentoken in lokalen Tests mischen. Für einen ausdrücklich eingewilligten Testnutzer den Consent-Callback im Browser auslösen. Im Network-Tab nach `/_medi/r` filtern und im PostHog-Activity-Tab die Events prüfen.
 
 | Kontrolle | Erwartung |
 |---|---|
-| PostHog deaktiviert oder Token fehlt | 0 Requests an `eu.i.posthog.com` |
+| PostHog deaktiviert oder Token fehlt | 0 Requests an `/_medi/r` |
 | PostHog aktiv, Consent noch nicht erteilt | 0 Requests und keine `med_i_posthog_*`-Kennungen |
 | Consent erteilt | `page.display` und genau ein `$pageview` pro Seitenladung, danach fachliche Events |
 | Consent widerrufen | keine neuen Requests, lokale med.i-IDs gelöscht |
@@ -89,7 +91,7 @@ In einem isolierten QA-Projekt `VITE_POSTHOG_ENABLED=true` und einen **QA-Projec
 ## 5. Technische Grenzen
 
 - Der Adapter nutzt ausschließlich PostHogs Capture API (kein vollwertiges PostHog-JS-SDK). Native Features wie Session Replay, Autocapture, Heatmaps, Toolbar und Feature Flags sind nicht implementiert. Für diese beiden Formate ist das bewusst so gewählt.
-- Browser-/Trackingblocker können Requests verhindern. Änderungen am CSP müssen `connect-src https://eu.i.posthog.com` zulassen.
+- Browser-/Trackingblocker können Requests weiterhin verhindern. Mit v6.11 wird `/_medi/r` unter der eigenen Domain genutzt; eine CORS-Freigabe für den direkten PostHog-Browser-Endpunkt wird dadurch nicht mehr benötigt. Die Vercel-Proxy-Konfiguration muss jedoch veröffentlicht sein.
 - Seiten/Screen-Navigation werden als `page.display` getrackt; ein physischer `pageview` wird pro Reload erzeugt. Die Session ID (UUIDv7) erlaubt PostHog die Session-Zuordnung, muss aber im Staging geprüft werden.
 - Bei fehlendem Netzwerk werden Events nicht offline gepuffert. Die Anwendung selbst funktioniert weiter.
 - Der Besuch über verschiedene Projekt-Domains führt zu getrennten anonymen Kennungen. Keine personengebundene Identifizierung.
