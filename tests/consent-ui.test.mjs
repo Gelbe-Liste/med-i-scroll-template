@@ -10,7 +10,8 @@ test('Dialog erlaubt Schließen ohne Consent-Änderung nur bei früherer Entsche
   assert.match(jsx, /aria-label="Datenschutzeinstellungen ohne Änderung schließen"/);
   assert.doesNotMatch(jsx, /storeAnalyticsConsent\(choice\)/);
   assert.doesNotMatch(jsx, /pseudonymisiert|anonymisiert|Bei Zustimmung verwenden wir|Datenschutzhinweise/);
-  assert.match(jsx, /ohne Klarnamen/);
+  assert.doesNotMatch(jsx, /ohne Klarnamen/);
+  assert.match(jsx, /Die Analyse erfolgt nur mit Ihrer Einwilligung/);
   assert.doesNotMatch(app, /privacyHref/);
   assert.equal(fs.existsSync(new URL('../public/datenschutz.html', import.meta.url)), false);
 });
@@ -20,5 +21,7 @@ test('Diagnose-Ansicht ist nur per URL-Parameter aktiv und zeigt keinen Token', 
   assert.match(ui, /get\("medi_debug"\) === "1"/);
   assert.match(ui, /Testevent senden/);
   assert.match(ui, /disabled=\{!ready\}/);
-  assert.doesNotMatch(ui, /phc_|token\}/);
+  assert.doesNotMatch(ui, /token\}/);
+  assert.match(ui, /Serverantwort/);
+  assert.match(ui, /qa_trace_id/);
 });

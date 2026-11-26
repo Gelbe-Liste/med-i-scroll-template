@@ -15,10 +15,11 @@
   "preview_tracking_template_default": false,
   "requires_cmp_for_real_users": false,
   "production_domain_kept": true,
-  "release": "1.6.0",
+  "release": "v6.10",
   "app_version": "v6.8",
   "analytics_consent": "gelbe UI, Opt-in, Opt-out/Widerruf, PostHog/Piano Gating",
   "consent_storage_days": 180,
   "privacy_notice_status": "Placeholder page removed; separate approved privacy notice required before public analytics use",
-  "diagnostics": "?medi_debug=1, only public flags/HTTP status, no token disclosure"
+  "diagnostics": "?medi_debug=1, only public flags/HTTP status, no token disclosure",
+  "notes": "PostHog response-body QA + consent copy update"
 }

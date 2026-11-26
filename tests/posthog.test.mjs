@@ -30,7 +30,7 @@ test("PostHog adapter: Consent, events, sessions and revocation", async () => {
     Object.defineProperty(globalThis, "navigator", { configurable:true, value:{onLine:true} });
     globalThis.fetch = async (url, request) => {
       captured.push({url, body:JSON.parse(request.body)});
-      return {ok:true,status:200};
+      return {ok:true,status:200,text:async()=>JSON.stringify({status:"Ok"})};
     };
     // Testumgebung ohne Vite: ausschließlich import.meta.env wird durch Test-Konfiguration ersetzt.
     const source = fs.readFileSync(new URL("../src/tracking/posthog.js", import.meta.url), "utf8")
@@ -54,6 +54,7 @@ test("PostHog adapter: Consent, events, sessions and revocation", async () => {
     posthog.sendToPosthog("page.display", {page:"QA | Home"});
     assert.equal(captured.length, 2, "React StrictMode duplicate page display blocked");
     assert.equal(posthog.getPosthogDiagnostics().acceptedCount,2);
+    assert.equal(posthog.getPosthogDiagnostics().lastTransport.serverInfo, "–", "QA-Ausgabe ist nur bei medi_debug=1 aktiv");
     posthog.sendToPosthog("click.action", {click:"Open contact",email:"person@example.de",destination_path:"person@example.de"});
     await new Promise(resolve => setTimeout(resolve,0));
     assert.equal(captured.length,3);

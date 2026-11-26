@@ -49,7 +49,7 @@ export default function AnalyticsConsent() {
             )}
           </div>
           <p>Wir möchten verstehen, wie unsere medizinischen Informationsangebote genutzt werden, um ihre Qualität und Benutzerfreundlichkeit zu verbessern.</p>
-          <p id="medi-consent-description">Hierzu erfassen wir Ihre Nutzungsdaten wie Kapitelaufrufe, Scrolltiefe und Interaktionen. Die Analyse erfolgt <strong>ohne Klarnamen</strong> und nur mit Ihrer Einwilligung. Sie können diese jederzeit widerrufen.</p>
+          <p id="medi-consent-description">Hierzu erfassen wir Ihre Nutzungsdaten wie Kapitelaufrufe, Scrolltiefe und Interaktionen. Die Analyse erfolgt nur mit Ihrer Einwilligung. Sie können diese jederzeit widerrufen.</p>
           <div className="medi-consent__actions">
             <button type="button" className="medi-consent__button medi-consent__button--reject" onClick={() => decide("rejected")}>{choice === "accepted" ? "Einwilligung widerrufen" : "Nur notwendige Funktionen"}</button>
             <button type="button" className="medi-consent__button medi-consent__button--accept" onClick={() => decide("accepted")}>Analytics zustimmen</button>

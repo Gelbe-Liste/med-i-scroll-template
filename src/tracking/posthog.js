@@ -21,13 +21,14 @@ let lastVirtualPage = { key: "", at: 0 };
 let volatileId = null;
 let volatileSession = null;
 const debugMode = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("medi_debug") === "1";
-let lastTransport = { event: "–", status: "Noch kein Request", code: null, at: null };
+let lastTransport = { event: "–", status: "Noch kein Request", code: null, at: null, serverInfo: "–" };
 let attemptedCount = 0;
 let acceptedCount = 0;
 
 export function getPosthogDiagnostics() {
   return {
     enabled, tokenConfigured: validToken, consent: allowed,
+    tokenHint: validToken ? `phc_…${token.slice(-5)}` : "–",
     environment: deployEnvironment, attemptedCount, acceptedCount,
     lastTransport: { ...lastTransport }
   };
@@ -122,6 +123,21 @@ function acquisition() {
   return result;
 }
 
+
+// Eine HTTP-200-Antwort beweist bei der Legacy-Capture-API nicht die Speicherung des Events.
+// Nur wenige bekannte Felder der Antwort werden in der QA-Anzeige sichtbar gemacht.
+function serverSummary(payload) {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return "Keine strukturierte Serverantwort";
+  const parts = [];
+  for (const key of ["status", "error", "code", "type", "quota_limited"]) {
+    const value = payload[key];
+    if (typeof value === "string") parts.push(`${key}: ${value.slice(0, 72)}`);
+    else if (typeof value === "number" || typeof value === "boolean") parts.push(`${key}: ${value}`);
+    else if (key === "quota_limited" && Array.isArray(value)) parts.push(`quota_limited: ${value.length} Einträge`);
+  }
+  return parts.join("; ") || "Keine bekannten Antwortfelder";
+}
+
 function send(eventName, props = {}) {
   if (!allowed || !enabled || !validToken || !navigator.onLine) {
     if (debugMode) updateDiagnostics({ event: eventName, status: !allowed ? "Keine Einwilligung" : !enabled ? "VITE_POSTHOG_ENABLED fehlt/false" : !validToken ? "Project Token fehlt/ungültig" : "Browser offline", code: null, at: new Date().toLocaleTimeString("de-DE") });
@@ -141,7 +157,7 @@ function send(eventName, props = {}) {
       $session_id: activeSession(),
       $process_person_profile: false,
       $lib: "med-i-posthog-capture-adapter",
-      $lib_version: "1.0.1"
+      $lib_version: "1.0.2"
     },
     timestamp: new Date().toISOString()
   };
@@ -150,12 +166,26 @@ function send(eventName, props = {}) {
   void fetch(endpoint, {
     method: "POST", mode: "cors", credentials: "omit", keepalive: true,
     headers: { "Content-Type": "application/json" }, body: JSON.stringify(body)
-  }).then(response => {
+  }).then(async response => {
+    // Response nur einmal lesen; es werden keine Projekt-Token angezeigt oder protokolliert.
+    let summary = "Antwort ohne Body";
+    try {
+      if (typeof response.text === "function") {
+        const raw = await response.text();
+        if (raw) { try { summary = serverSummary(JSON.parse(raw)); }
+          catch { summary = `Nicht-JSON-Antwort (${raw.length} Zeichen)`; }
+        }
+      }
+    } catch { summary = "Antwortinhalt nicht lesbar"; }
     if (response.ok) acceptedCount += 1;
-    if (debugMode) updateDiagnostics({ event: eventName, status: response.ok ? "HTTP angenommen (Anzeige in PostHog separat prüfen)" : "PostHog antwortet mit Fehler", code: response.status, at: new Date().toLocaleTimeString("de-DE") });
-    if (!response.ok && (debugMode || import.meta.env.DEV)) console.warn("[PostHog] HTTP", response.status);
+    if (debugMode) updateDiagnostics({
+      event: eventName,
+      status: response.ok ? "HTTP angenommen – Ingestion im PostHog-Projekt noch ungeprüft" : "HTTP-Fehler bei PostHog",
+      code: response.status, serverInfo: summary, at: new Date().toLocaleTimeString("de-DE")
+    });
+    if (!response.ok && (debugMode || import.meta.env.DEV)) console.warn("[PostHog] HTTP", response.status, summary);
   }).catch(error => {
-    if (debugMode) updateDiagnostics({ event: eventName, status: "Netzwerkfehler / Blocker / CORS (Network-Tab prüfen)", code: null, at: new Date().toLocaleTimeString("de-DE") });
+    if (debugMode) updateDiagnostics({ event: eventName, status: "Netzwerkfehler / Blocker / CORS (Network-Tab prüfen)", code: null, serverInfo: "Kein HTTP-Ergebnis", at: new Date().toLocaleTimeString("de-DE") });
     if (debugMode || import.meta.env.DEV) console.warn("[PostHog] Event fehlgeschlagen", error);
   });
 }
