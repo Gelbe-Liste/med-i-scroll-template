@@ -1,3 +1,5 @@
+> Historische Release-Notiz v6.7. Für aktuellen Stand v6.8 siehe `UPDATE-2026-11-26-v6.8-POSTHOG-FEHLERSUCHE.md`. Die unten beschriebene Datenschutz-Vorlagenseite ist ab v6.8 nicht mehr enthalten.
+
 # Release v6.7 · Gemeinsames Analytics-Consent-Management (26.11.2026)
 
 ## Neue Funktionen

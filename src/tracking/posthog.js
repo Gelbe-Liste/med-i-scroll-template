@@ -20,6 +20,24 @@ let pageviewSent = false;
 let lastVirtualPage = { key: "", at: 0 };
 let volatileId = null;
 let volatileSession = null;
+const debugMode = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("medi_debug") === "1";
+let lastTransport = { event: "–", status: "Noch kein Request", code: null, at: null };
+let attemptedCount = 0;
+let acceptedCount = 0;
+
+export function getPosthogDiagnostics() {
+  return {
+    enabled, tokenConfigured: validToken, consent: allowed,
+    environment: deployEnvironment, attemptedCount, acceptedCount,
+    lastTransport: { ...lastTransport }
+  };
+}
+function updateDiagnostics(patch) {
+  lastTransport = { ...lastTransport, ...patch };
+  if (debugMode && typeof window !== "undefined") {
+    window.dispatchEvent(new Event("medi:posthog-diagnostics"));
+  }
+}
 
 function uuidv7() {
   // Korrektes UUIDv7 für PostHog-Sessions (RFC 9562, timestamp in ms).
@@ -105,12 +123,16 @@ function acquisition() {
 }
 
 function send(eventName, props = {}) {
-  if (!allowed || !enabled || !validToken || !navigator.onLine) return;
+  if (!allowed || !enabled || !validToken || !navigator.onLine) {
+    if (debugMode) updateDiagnostics({ event: eventName, status: !allowed ? "Keine Einwilligung" : !enabled ? "VITE_POSTHOG_ENABLED fehlt/false" : !validToken ? "Project Token fehlt/ungültig" : "Browser offline", code: null, at: new Date().toLocaleTimeString("de-DE") });
+    return;
+  }
   const clean = cleanProperties({ ...context, ...props });
   // Person profiles ausdrücklich nicht anlegen; Auswertung über anonymen distinct_id.
   const body = {
-    token,
+    api_key: token,
     event: eventName,
+    distinct_id: anonymousId(),
     properties: {
       ...clean,
       ...acquisition(),
@@ -123,12 +145,19 @@ function send(eventName, props = {}) {
     },
     timestamp: new Date().toISOString()
   };
+  attemptedCount += 1;
+  if (debugMode) updateDiagnostics({ event: eventName, status: "Request läuft …", code: null, at: new Date().toLocaleTimeString("de-DE") });
   void fetch(endpoint, {
     method: "POST", mode: "cors", credentials: "omit", keepalive: true,
     headers: { "Content-Type": "application/json" }, body: JSON.stringify(body)
   }).then(response => {
-    if (!response.ok && import.meta.env.DEV) console.warn("[PostHog] HTTP", response.status);
-  }).catch(error => { if (import.meta.env.DEV) console.warn("[PostHog] Event fehlgeschlagen", error); });
+    if (response.ok) acceptedCount += 1;
+    if (debugMode) updateDiagnostics({ event: eventName, status: response.ok ? "HTTP angenommen (Anzeige in PostHog separat prüfen)" : "PostHog antwortet mit Fehler", code: response.status, at: new Date().toLocaleTimeString("de-DE") });
+    if (!response.ok && (debugMode || import.meta.env.DEV)) console.warn("[PostHog] HTTP", response.status);
+  }).catch(error => {
+    if (debugMode) updateDiagnostics({ event: eventName, status: "Netzwerkfehler / Blocker / CORS (Network-Tab prüfen)", code: null, at: new Date().toLocaleTimeString("de-DE") });
+    if (debugMode || import.meta.env.DEV) console.warn("[PostHog] Event fehlgeschlagen", error);
+  });
 }
 
 function sendPhysicalPageview(props) {
@@ -171,6 +200,7 @@ export function setPosthogConsent(consented) {
   const next = consented === true;
   if (!next) {
     allowed = false;
+    if (debugMode) updateDiagnostics({ status: "Keine Analytics-Einwilligung", code: null });
     volatileId = null;
     volatileSession = null;
     pageviewSent = false;
@@ -181,6 +211,7 @@ export function setPosthogConsent(consented) {
   }
   if (!enabled || !validToken || allowed) return;
   allowed = true;
+  if (debugMode) updateDiagnostics({ status: "Einwilligung erteilt – warte auf Event", code: null });
   // Bei Freigabe während einer laufenden Ansicht nur die *aktuelle* Ansicht erfassen.
   // Frühere Interaktionen werden aus Datenschutzgründen nicht nachgesendet.
   if (latestPage) sendToPosthog("page.display", latestPage);

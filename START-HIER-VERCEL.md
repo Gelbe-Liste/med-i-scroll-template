@@ -1,12 +1,12 @@
-# START HIER – v6.7 · Consent + PostHog EU + Piano auf Vercel Production
+# START HIER – v6.8 · Consent + PostHog EU + Piano auf Vercel Production
 
-**Neuer Stand:** 26.11.2026 · Analytics-Consent Release v1.5.0
+**Neuer Stand:** 26.11.2026 · Consent-/Diagnose-Release v1.6.0
 
 ## 1. Quellcode bereitstellen
 
 - Diese Version entpacken, **den Inhalt des obersten Projektordners** in das mit Vercel verbundene Git-Repository übernehmen, committen und auf den Produktionsbranch pushen.
 - Alternativ aus dem Projektordner `vercel --prod` verwenden. Ein ZIP als Datei wird nicht direkt von Vercel als Anwendung deployed.
-- Existierende Inhalte und App-Navigation bleiben erhalten; neu sind Consent-UI, Gating und Datenschutz-Vorlagenseite.
+- Existierende Inhalte und App-Navigation bleiben erhalten. Die Consent-Box ist gekürzt und besitzt nach erneuter Öffnung ein Schließen-X. Zusätzlich ist eine Diagnoseansicht verfügbar.
 - Nach dem Build die reguläre Domain testen. Prüfen, ob die gelbe Consent-Box beim ersten Besuch sichtbar ist.
 
 ## 2. Environment Variables in Vercel **für Production**
@@ -45,11 +45,19 @@ Der numerische Project ID wird nicht benötigt. Der öffentliche `phc_...`-Token
 
 ## 5. Datenschutz-Freigabe vor breiter Datenerhebung
 
-`/datenschutz.html` ist eine **gekennzeichnete Projektvorlage**, keine abschließend rechtlich geprüfte Datenschutzerklärung. Vor Kunden-Go-live Verantwortliche, Datenschutzkontakt, Verarbeitung, AVV/DPA, Speicherdauer, PostHog-IP-Datenverarbeitung, Widerrufs-/Betroffenenrechte und ggf. Piano ergänzen und freigeben lassen.
+Die unvollständige Vorlage `/datenschutz.html` wurde auf Wunsch entfernt. **Vor einer regulären Analytics-Nutzung müssen dennoch transparente Datenschutzhinweise öffentlich zugänglich sein**, z. B. in der zentralen Vidal-MMI-Datenschutzerklärung, die zuvor explizit um diese Anwendungen und PostHog/Piano zu ergänzen und freizugeben ist (Zweck, Anbieter, IDs, IP-Verarbeitung, EU-Hosting, Rechtsgrundlage, Speicherdauer, Widerruf und Rechte). Es ist nicht ausreichend, diese Informationen vollständig wegzulassen.
 
-Die Formulierung **pseudonymisiert** ist technisch richtig: PostHog verwendet einen zufälligen, wiedererkennbaren `distinct_id`. Vollständige Anonymisierung ist dadurch nicht gegeben.
+Der kompakte Consent-Text lautet jetzt „ohne Klarnamen“. Vollständige Anonymisierung wäre wegen der persistenten zufälligen `distinct_id` nicht korrekt.
 
-## 6. Tests und Fehlerbehebung
+## 6. Gezielte Production-Diagnose und Tests
+
+1. Nach dem neuen Deployment `https://med-i-scroll-template.vercel.app/?medi_debug=1` aufrufen.
+2. Diagnose muss anzeigen: Integration aktiv **Ja**, Token konfiguriert **Ja**, Analytics-Einwilligung **Ja** (ggf. Banner zustimmen).
+3. **Testevent senden** klicken, HTTP-Status ablesen und PostHog Activity auf `med.i.qa` prüfen. Testevents tragen `qa_only=true`.
+4. Bei fehlender Integration oder Token Vercel Production-Variablen korrigieren und neu bauen; bei HTTP-Fehlern Browser-Netzwerk/Blocker/CSP prüfen; bei 200 aber keiner Sichtbarkeit das EU-Projekt und den Token abgleichen.
+5. Schließen-Test: nach einer bestehenden Entscheidung Datenschutz öffnen und X betätigen; Entscheidung darf sich nicht ändern.
+
+## 7. Weitere technische Hinweise
 
 - `npm ci && npm run build` in einer Umgebung mit Paketregister oder das Vercel-Build-Log prüfen.
 - `npm run test:analytics` (Node 22) ausführen.

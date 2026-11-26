@@ -1,11 +1,9 @@
-# Vercel > Project > Settings > Environment Variables
-# ENVIRONMENT: Production (nicht Preview)
-# Token in Vercel aus PostHog EU > Settings > Project > General eingeben.
-# Clientseitiger Public Project Token (phc_...), keine numerische Project ID.
-# PostHog sendet auch mit ENABLED=true erst nach ausdruecklicher gueltiger Analytics-Einwilligung.
+# Vercel > Settings > Environment Variables > Production – anschliessend REDEPLOY
 VITE_POSTHOG_ENABLED=true
-VITE_POSTHOG_PROJECT_TOKEN=phc_HIER_DEN_EIGENEN_PROJECT_TOKEN_EINFUEGEN
+VITE_POSTHOG_PROJECT_TOKEN=phc_HIER_DEN_PROJECT_TOKEN_AUS_POSTHOG_EU_EINFUEGEN
 VITE_POSTHOG_DEPLOY_ENV=production
 VITE_PIANO_ENABLED=false
 VITE_PIANO_ESSENTIAL_APPROVED=false
 VITE_PIANO_CUSTOM_VIDEO_EVENTS=false
+# Testlink nach Deployment: https://med-i-scroll-template.vercel.app/?medi_debug=1
+# Ohne aktive Einwilligung bleiben Analytics-Events aus.

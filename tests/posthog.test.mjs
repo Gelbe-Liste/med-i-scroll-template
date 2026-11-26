@@ -46,12 +46,14 @@ test("PostHog adapter: Consent, events, sessions and revocation", async () => {
     assert.deepEqual(captured.map(x=>x.body.event), ["$pageview", "page.display"]);
     assert(captured.every(x => x.url === "https://eu.i.posthog.com/i/v0/e/"));
     assert(captured.every(x => x.body.properties.project_id === "qa-project"));
+    assert(captured.every(x => x.body.api_key === "phc_testtoken123" && x.body.distinct_id === x.body.properties.distinct_id));
     assert(captured.every(x => x.body.properties.deployment_environment === "preview"));
     assert.equal(captured[0].body.properties.$current_url, "https://med-i.example.de/test");
     assert.equal(captured[0].body.properties.$process_person_profile, false);
     assert.match(captured[0].body.properties.$session_id, /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
     posthog.sendToPosthog("page.display", {page:"QA | Home"});
     assert.equal(captured.length, 2, "React StrictMode duplicate page display blocked");
+    assert.equal(posthog.getPosthogDiagnostics().acceptedCount,2);
     posthog.sendToPosthog("click.action", {click:"Open contact",email:"person@example.de",destination_path:"person@example.de"});
     await new Promise(resolve => setTimeout(resolve,0));
     assert.equal(captured.length,3);

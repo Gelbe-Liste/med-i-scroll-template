@@ -1,3 +1,5 @@
+> **Update v6.8 (26.11.2026):** Der Legacy-Capture-Adapter sendet `api_key` und `distinct_id` in dokumentierter Form. Für nachvollziehbare Fehlersuche `?medi_debug=1` verwenden. Separate Datenschutzinformationen außerhalb der Consent-Box sind vor dem öffentlichen Analytics-Betrieb erforderlich. Siehe `UPDATE-2026-11-26-v6.8-POSTHOG-FEHLERSUCHE.md`.
+
 # Nachtrag v1.5.0: Integrierte Consent-Box – siehe START-HIER-VERCEL.md und CHANGES-2026-11-26-CONSENT.md.
 
 # PostHog EU Cloud + Piano Analytics · Integration v1.4 · 26.11.2026
